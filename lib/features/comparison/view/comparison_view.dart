@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,11 +15,33 @@ import '../widgets/comparison_chart.dart';
 import '../widgets/comparison_metrics.dart';
 import '../widgets/experiment_picker.dart';
 
-class ComparisonView extends ConsumerWidget {
-  const ComparisonView({super.key});
+class ComparisonView extends ConsumerStatefulWidget {
+  final List<String> initialSelection;
+  const ComparisonView({this.initialSelection = const [], super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ComparisonView> createState() => _ComparisonViewState();
+}
+
+class _ComparisonViewState extends ConsumerState<ComparisonView> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialSelection.isNotEmpty) {
+      unawaited(
+        Future<void>.microtask(() async {
+          if (mounted) {
+            await ref
+                .read(comparisonControllerProvider.notifier)
+                .selectIds(widget.initialSelection);
+          }
+        }),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(comparisonControllerProvider);
     final actions = ref.read(comparisonControllerProvider.notifier);
     ref.listen(comparisonControllerProvider.select((s) => s.notice), (

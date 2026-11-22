@@ -21,23 +21,31 @@ class AppDimensions {
   static const double radiusXl = 20;
   static const double radiusPill = 999;
 
-  static const BorderRadius borderRadiusSm =
-      BorderRadius.all(Radius.circular(radiusSm));
-  static const BorderRadius borderRadiusMd =
-      BorderRadius.all(Radius.circular(radiusMd));
-  static const BorderRadius borderRadiusLg =
-      BorderRadius.all(Radius.circular(radiusLg));
-  static const BorderRadius borderRadiusXl =
-      BorderRadius.all(Radius.circular(radiusXl));
+  static const BorderRadius borderRadiusSm = BorderRadius.all(
+    Radius.circular(radiusSm),
+  );
+  static const BorderRadius borderRadiusMd = BorderRadius.all(
+    Radius.circular(radiusMd),
+  );
+  static const BorderRadius borderRadiusLg = BorderRadius.all(
+    Radius.circular(radiusLg),
+  );
+  static const BorderRadius borderRadiusXl = BorderRadius.all(
+    Radius.circular(radiusXl),
+  );
 
   // Padding presets
   static const EdgeInsets pagePadding = EdgeInsets.all(xl);
   static const EdgeInsets cardPadding = EdgeInsets.all(lg);
   static const EdgeInsets cardPaddingLarge = EdgeInsets.all(xl);
-  static const EdgeInsets inputPadding =
-      EdgeInsets.symmetric(horizontal: md, vertical: md);
-  static const EdgeInsets buttonPadding =
-      EdgeInsets.symmetric(horizontal: xl, vertical: md);
+  static const EdgeInsets inputPadding = EdgeInsets.symmetric(
+    horizontal: md,
+    vertical: md,
+  );
+  static const EdgeInsets buttonPadding = EdgeInsets.symmetric(
+    horizontal: xl,
+    vertical: md,
+  );
 
   // Control heights
   static const double controlHeight = 44;
@@ -72,6 +80,17 @@ class AppDimensions {
   static const double chartHeightSm = 200;
   static const double statusDotSize = 8;
   static const double progressBarHeight = 6;
+  static const int deliveryPageSize = 256;
+  static const double deliveryCellSize = 36;
+  static const double timelineHeight = 200;
+  static const double timelineEndpointInset = 40;
+  static const double timelineStrokeWidth = 2;
+  static const double timelineDotRadius = 6;
+  static const double narrowChartWidth = 280;
+  static const double histogramMinWidth = 480;
+  static const int replayPageSize = 256;
+  static const Duration visualizerFrameDuration = Duration(milliseconds: 33);
+  static const Duration visualizerStepDuration = Duration(milliseconds: 700);
 
   // Motion
   static const Duration animFast = Duration(milliseconds: 150);

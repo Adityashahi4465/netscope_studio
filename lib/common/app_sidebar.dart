@@ -39,9 +39,7 @@ class AppSidebar extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: AppDimensions.xs),
             child: Tooltip(
-              message: route.available
-                  ? route.title
-                  : '${route.title} · Planned',
+              message: route.title,
               child: Material(
                 color: route == current
                     ? AppColors.primarySoft
@@ -49,9 +47,7 @@ class AppSidebar extends StatelessWidget {
                 borderRadius: AppDimensions.borderRadiusSm,
                 child: InkWell(
                   borderRadius: AppDimensions.borderRadiusSm,
-                  onTap: route.available
-                      ? () => RouteUtils.go(context, route)
-                      : null,
+                  onTap: () => RouteUtils.go(context, route),
                   child: SizedBox(
                     height: AppDimensions.sidebarItemHeight,
                     child: Row(
@@ -62,9 +58,7 @@ class AppSidebar extends StatelessWidget {
                         if (!compact) const SizedBox(width: AppDimensions.md),
                         Icon(
                           route.icon,
-                          color: !route.available
-                              ? AppColors.textDisabled
-                              : route == current
+                          color: route == current
                               ? AppColors.primaryLight
                               : AppColors.textSecondary,
                         ),
@@ -75,11 +69,7 @@ class AppSidebar extends StatelessWidget {
                               route.title,
                               style: route == current
                                   ? AppTextStyle.navItemActive
-                                  : AppTextStyle.navItem.copyWith(
-                                      color: route.available
-                                          ? AppColors.textSecondary
-                                          : AppColors.textDisabled,
-                                    ),
+                                  : AppTextStyle.navItem,
                             ),
                           ),
                         ],

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'constants/app_constants.dart';
 import 'routes/app_router.dart';
+import 'routes/route_utils.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
@@ -25,6 +26,9 @@ class MyApp extends StatelessWidget {
     title: AppConstants.appName,
     debugShowCheckedModeBanner: false,
     theme: AppTheme.dark,
+    navigatorKey: RouteUtils.navigatorKey,
+    builder: (_, child) =>
+        Overlay.wrap(child: AppShell(child: child ?? const SizedBox.shrink())),
     onGenerateRoute: AppRouter.generate,
   );
 }

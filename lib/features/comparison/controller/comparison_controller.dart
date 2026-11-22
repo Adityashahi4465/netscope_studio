@@ -85,6 +85,15 @@ class ComparisonController extends StateNotifier<ComparisonState> {
     await _load(ids);
   }
 
+  Future<void> selectIds(Iterable<String> ids) async {
+    if (state.exporting) return;
+    state = ComparisonState(
+      available: state.available,
+      selected: Set.unmodifiable(ids),
+    );
+    await refresh();
+  }
+
   Future<void> _load(Set<String> ids) async {
     final request = ++_request;
     final selected = Set<String>.unmodifiable(ids);

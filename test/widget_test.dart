@@ -3,9 +3,46 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../lib/main.dart';
+import '../lib/common/app_sidebar.dart';
+import '../lib/common/custom_app_bar.dart';
 import '../lib/theme/app_theme.dart';
 
 void main() {
+  testWidgets(
+    'sidebar and top bar stay mounted while only main content fades',
+    (tester) async {
+      await tester.runAsync(AppTheme.loadFonts);
+      await tester.pumpWidget(const ProviderScope(child: MyApp()));
+      await tester.pumpAndSettle();
+      final sidebar = tester.element(find.byType(AppSidebar));
+      final topBar = tester.element(find.byType(CustomAppBar));
+      final sidebarRect = tester.getRect(find.byType(AppSidebar));
+      final topBarRect = tester.getRect(find.byType(CustomAppBar));
+      await tester.tap(find.byTooltip('Latency analysis'));
+      await tester.pump(const Duration(milliseconds: 75));
+      expect(
+        identical(tester.element(find.byType(AppSidebar)), sidebar),
+        isTrue,
+      );
+      expect(
+        identical(tester.element(find.byType(CustomAppBar)), topBar),
+        isTrue,
+      );
+      expect(tester.getRect(find.byType(AppSidebar)), sidebarRect);
+      expect(tester.getRect(find.byType(CustomAppBar)), topBarRect);
+      expect(
+        find.ancestor(
+          of: find.byType(AppSidebar),
+          matching: find.byType(FadeTransition),
+        ),
+        findsNothing,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Latency analysis'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets(
     'compact cockpit validates edits, resets, and opens real settings',
     (tester) async {

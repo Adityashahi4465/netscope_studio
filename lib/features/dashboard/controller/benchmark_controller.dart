@@ -60,6 +60,26 @@ class BenchmarkController extends StateNotifier<BenchmarkState> {
 
   void reset() => selectPreset(BenchmarkPreset.quick);
 
+  void prepareAnalysis(BenchmarkPreset preset) {
+    if (state.locked) return;
+    final loss = preset == BenchmarkPreset.udpLoss;
+    final config = BenchmarkConfig.fromPreset(preset).copyWith(
+      protocol: loss ? ProtocolType.udp : ProtocolType.both,
+      tcpPort: state.config.tcpPort,
+      udpPort: state.config.udpPort,
+      timeoutMs: state.config.timeoutMs,
+      tcpPayloadBytes: 64 * 1024,
+      packetCount: loss ? 256 : 100,
+      repetitions: 1,
+      rttProbes: loss ? 10 : 40,
+    );
+    state = BenchmarkState(
+      config: config,
+      preset: preset,
+      formRevision: state.formRevision + 1,
+    );
+  }
+
   void edit(ConfigField field, String raw) {
     if (state.locked) return;
     state = BenchmarkState(
