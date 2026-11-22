@@ -349,8 +349,8 @@ void main() {
       lab.config(count: 100000, probes: 0),
       packetInterval: const Duration(milliseconds: 100),
     );
-    // A completed control round trip gives the ongoing run time to register;
-    // the long workload stays active while cancellation interrupts pacing.
+    // Allow registration and the first send; the long paced workload remains
+    // active until cancellation, even if registration takes longer than usual.
     await Future<void>.delayed(const Duration(milliseconds: 30));
     value(await client.cancel());
     expect(
