@@ -1,0 +1,25 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    avoid_relative_lib_imports: ignore
+  exclude:
+    - "**/*.g.dart"
+    - build/**
+    - windows/**
+    - macos/**
+
+linter:
+  rules:
+    prefer_single_quotes: true
+    prefer_relative_imports: true
+    always_use_package_imports: false
+    prefer_const_constructors: true
+    prefer_const_declarations: true
+    prefer_final_fields: true
+    prefer_final_locals: true
+    avoid_dynamic_calls: true
+    avoid_print: true
+    unawaited_futures: true
+    require_trailing_commas: true
+    public_member_api_docs: false
