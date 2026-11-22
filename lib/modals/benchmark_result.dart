@@ -6,6 +6,8 @@ import 'udp_result.dart';
 /// Computed by MetricsService, never in widgets.
 class AggregateMetrics {
   final int runs;
+  final int sampleCount;
+  final int variationPairs;
   final double throughputMbps;
   final double minRttMs;
   final double avgRttMs;
@@ -22,6 +24,8 @@ class AggregateMetrics {
 
   const AggregateMetrics({
     this.runs = 0,
+    this.sampleCount = 0,
+    this.variationPairs = 0,
     this.throughputMbps = 0,
     this.minRttMs = 0,
     this.avgRttMs = 0,
@@ -39,6 +43,8 @@ class AggregateMetrics {
 
   Map<String, dynamic> toMap() => <String, dynamic>{
     'runs': runs,
+    'sampleCount': sampleCount,
+    'variationPairs': variationPairs,
     'throughputMbps': throughputMbps,
     'minRttMs': minRttMs,
     'avgRttMs': avgRttMs,
@@ -54,6 +60,8 @@ class AggregateMetrics {
 
   factory AggregateMetrics.fromMap(Map<String, dynamic> m) => AggregateMetrics(
     runs: (m['runs'] as num).toInt(),
+    sampleCount: (m['sampleCount'] as num?)?.toInt() ?? 0,
+    variationPairs: (m['variationPairs'] as num?)?.toInt() ?? 0,
     throughputMbps: (m['throughputMbps'] as num).toDouble(),
     minRttMs: (m['minRttMs'] as num).toDouble(),
     avgRttMs: (m['avgRttMs'] as num).toDouble(),

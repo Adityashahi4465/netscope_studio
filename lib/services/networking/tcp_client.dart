@@ -9,6 +9,7 @@ import '../../constants/network_constants.dart';
 import '../../core/type_defs.dart';
 import '../../modals/benchmark_config.dart';
 import '../../modals/tcp_result.dart';
+import '../simulation/network_simulator.dart';
 import 'frame_buffer.dart';
 import 'i_tcp_client.dart';
 import 'network_failure.dart';
@@ -17,6 +18,8 @@ import 'packet_protocol.dart';
 class TcpClient implements ITcpClient {
   final PacketProtocol _protocol = const PacketProtocol();
   Socket? _socket;
+  Timer? _paceTimer;
+  Completer<void>? _paceWait;
   ConnectionTask<Socket>? _connecting;
   bool _running = false;
   bool _cancelled = false;
@@ -35,7 +38,11 @@ class TcpClient implements ITcpClient {
         ),
       );
     }
-    if (config.host != NetworkConstants.defaultHost ||
+    final rate = config.simulation.rateLimitMbps;
+    if (!rate.isFinite ||
+        rate < 0 ||
+        (rate > 0 && 8 / rate > config.timeoutMs * 1000) ||
+        config.host != NetworkConstants.defaultHost ||
         config.tcpPort <= 0 ||
         config.tcpPort > 65535 ||
         config.tcpPayloadBytes <= 0 ||
@@ -132,10 +139,22 @@ class TcpClient implements ITcpClient {
       final bulk = Stopwatch()..start();
       var sent = 0;
       var sequence = 0;
-      final payload = Uint8List(NetworkConstants.tcpChunkSize);
+      final pacer = const NetworkSimulator().pacer(config.simulation);
+      final payload = Uint8List(pacer.chunkSize);
       while (sent < config.tcpPayloadBytes) {
         _checkCancelled();
         final count = min(payload.length, config.tcpPayloadBytes - sent);
+        if (rate > 0) {
+          final wait = pacer.remaining(sent + count, bulk.elapsed);
+          if (wait > Duration.zero) {
+            final ready = Completer<void>();
+            _paceWait = ready;
+            _paceTimer = Timer(wait, ready.complete);
+            await ready.future;
+            _paceWait = null;
+            _paceTimer = null;
+          }
+        }
         await _send(
           socket,
           Packet(
@@ -277,6 +296,8 @@ class TcpClient implements ITcpClient {
   @override
   FutureEitherVoid cancel() async {
     _cancelled = true;
+    _paceTimer?.cancel();
+    if (_paceWait case final wait? when !wait.isCompleted) wait.complete();
     _connecting?.cancel();
     _socket?.destroy();
     return right(null);

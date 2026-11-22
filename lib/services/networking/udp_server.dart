@@ -12,6 +12,8 @@ import 'network_failure.dart';
 import 'packet_protocol.dart';
 import 'udp_audit.dart';
 import 'udp_control_channel.dart';
+import '../../modals/simulation_config.dart';
+import '../simulation/network_simulator.dart';
 import 'udp_drop_policy.dart';
 
 class UdpServer implements IUdpServer {
@@ -273,19 +275,20 @@ class UdpServer implements IUdpServer {
     }
     final delay = _integer(body, 'delayMs', 0, NetworkConstants.maxDelayMs);
     final jitter = _integer(body, 'jitterMs', 0, NetworkConstants.maxJitterMs);
+    final simulation = SimulationConfig(
+      delayMs: delay,
+      jitterMs: jitter,
+      lossPercent: loss.toDouble(),
+      seed: seed,
+    );
+    const simulator = NetworkSimulator();
     _sessions[experiment] = _UdpSession(
       port: port,
       count: count,
       size: size,
       probeCount: probes,
-      drop: UdpDropPolicy(probability: loss.toDouble() / 100, seed: seed),
-      delay:
-          delayPolicy ??
-          JitterDelayPolicy(
-            delay: Duration(milliseconds: delay),
-            jitter: Duration(milliseconds: jitter),
-            seed: seed,
-          ),
+      drop: simulator.drop(simulation),
+      delay: delayPolicy ?? simulator.delay(simulation),
       lastActivityUs: _clock.elapsedMicroseconds,
     );
     return <String, Object?>{'ok': true, 'seed': seed, 'udpPort': boundPort};

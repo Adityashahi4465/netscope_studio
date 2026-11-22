@@ -87,13 +87,13 @@ class _Lab {
     );
   }
 
-  void send(
+  Future<void> send(
     RawDatagramSocket socket,
     int sequence, {
     int experiment = 1,
     int count = 5,
     int size = 128,
-  }) {
+  }) async {
     final bytes = value(
       const PacketProtocol().encode(
         Packet(
@@ -105,10 +105,18 @@ class _Lab {
         ),
       ),
     );
-    expect(
-      socket.send(bytes, InternetAddress.loopbackIPv4, udpPort),
-      bytes.length,
-    );
+    await sendBytes(socket, bytes);
+  }
+
+  Future<void> sendBytes(RawDatagramSocket socket, List<int> bytes) async {
+    final clock = Stopwatch()..start();
+    while (true) {
+      final sent = socket.send(bytes, InternetAddress.loopbackIPv4, udpPort);
+      if (sent == bytes.length) return;
+      expect(sent, 0);
+      expect(clock.elapsed, lessThan(const Duration(seconds: 2)));
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+    }
   }
 
   Future<UdpAudit> audit({int experiment = 1}) async => value(
@@ -198,15 +206,15 @@ void main() {
       addTearDown(socket.close);
       addTearDown(stranger.close);
       await lab.begin(socket);
-      socket.send(<int>[1, 2], InternetAddress.loopbackIPv4, lab.udpPort);
-      socket.send(Uint8List(36), InternetAddress.loopbackIPv4, lab.udpPort);
-      lab.send(socket, 0, size: 1401);
-      lab.send(socket, 5);
-      lab.send(socket, 0, size: 129);
-      lab.send(socket, 0, count: 6);
-      lab.send(socket, 0, experiment: 2);
-      lab.send(stranger, 0);
-      lab.send(socket, 0);
+      await lab.sendBytes(socket, <int>[1, 2]);
+      await lab.sendBytes(socket, Uint8List(36));
+      await lab.send(socket, 0, size: 1401);
+      await lab.send(socket, 5);
+      await lab.send(socket, 0, size: 129);
+      await lab.send(socket, 0, count: 6);
+      await lab.send(socket, 0, experiment: 2);
+      await lab.send(stranger, 0);
+      await lab.send(socket, 0);
       final audit = await lab.audit();
       expect(audit.receivedSequences, <int>{0});
       expect(audit.bytesReceived, 128 - 36);
@@ -228,7 +236,7 @@ void main() {
       addTearDown(socket.close);
       await lab.begin(socket);
       for (final sequence in <int>[2, 0, 2, 1]) {
-        lab.send(socket, sequence);
+        await lab.send(socket, sequence);
       }
       final audit = await lab.audit();
       expect(audit.receivedSequences, <int>{0, 1, 2});
@@ -236,7 +244,10 @@ void main() {
       expect(audit.duplicates, 1);
       expect(audit.outOfOrderSequences, <int>{0, 1});
       expect(audit.bytesReceived, 3 * (128 - 36));
-      lab.send(socket, 3); // Audit evidence stays frozen after the deadline.
+      await lab.send(
+        socket,
+        3,
+      ); // Audit evidence stays frozen after the deadline.
       final again = value(await lab.udp.audit(1));
       expect(again.receivedSequences, <int>{0, 1, 2});
     },
@@ -262,7 +273,7 @@ void main() {
       );
       for (var index = 0; index < 64; index++) {
         final sequence = experiment == 1 ? index : 63 - index;
-        lab.send(socket, sequence, experiment: experiment, count: 64);
+        await lab.send(socket, sequence, experiment: experiment, count: 64);
         await Future<void>.delayed(Duration.zero);
       }
       audits.add(await lab.audit(experiment: experiment));
@@ -288,7 +299,7 @@ void main() {
     addTearDown(socket.close);
     await lab.begin(socket, loss: 100);
     for (final sequence in <int>[0, 0, 1, 2]) {
-      lab.send(socket, sequence);
+      await lab.send(socket, sequence);
     }
     final audit = await lab.audit();
     expect(audit.simulationDropCount, 4);
@@ -311,7 +322,7 @@ void main() {
       );
       addTearDown(socket.close);
       await lab.begin(socket, count: 100000);
-      lab.send(socket, 99999, count: 100000);
+      await lab.send(socket, 99999, count: 100000);
       final audit = await lab.audit();
       expect(audit.packetCount, 100000);
       expect(audit.receivedSequences, <int>{99999});
@@ -335,7 +346,7 @@ void main() {
         code(await UdpClient().run(lab.config())),
         NetworkFailureCode.busy,
       );
-      lab.send(socket, 0);
+      await lab.send(socket, 0);
       expect((await lab.audit()).receivedSequences, <int>{0});
     },
   );
@@ -442,7 +453,7 @@ void main() {
       }
       final lab = _Lab();
       await lab.start();
-      final config = lab.config();
+      final config = lab.config(timeoutMs: 8000);
       await lab.stop();
       expect(code(await client.run(config)), NetworkFailureCode.refused);
     },

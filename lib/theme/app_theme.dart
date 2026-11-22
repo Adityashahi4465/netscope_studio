@@ -9,6 +9,20 @@ import 'app_text_style.dart';
 class AppTheme {
   AppTheme._();
 
+  static Future<void> loadFonts() async {
+    GoogleFonts.config.allowRuntimeFetching = false;
+    await GoogleFonts.pendingFonts([
+      for (final weight in [
+        FontWeight.w400,
+        FontWeight.w500,
+        FontWeight.w600,
+        FontWeight.w700,
+        FontWeight.w800,
+      ])
+        GoogleFonts.manrope(fontWeight: weight),
+    ]);
+  }
+
   static ThemeData get dark {
     final ThemeData base = ThemeData(
       brightness: Brightness.dark,
@@ -29,12 +43,11 @@ class AppTheme {
       outlineVariant: AppColors.border,
     );
 
-    final TextTheme textTheme = base.textTheme
-        .apply(
-          fontFamily: GoogleFonts.manrope().fontFamily,
-          bodyColor: AppColors.textPrimary,
-          displayColor: AppColors.textPrimary,
-        );
+    final TextTheme textTheme = base.textTheme.apply(
+      fontFamily: GoogleFonts.manrope().fontFamily,
+      bodyColor: AppColors.textPrimary,
+      displayColor: AppColors.textPrimary,
+    );
 
     return base.copyWith(
       colorScheme: scheme,

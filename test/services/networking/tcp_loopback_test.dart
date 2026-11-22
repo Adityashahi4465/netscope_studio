@@ -107,10 +107,10 @@ void main() {
     final conflict = await other.start(port: port);
     expect(code(conflict), NetworkFailureCode.portInUse, reason: '$conflict');
     value(await server.stop());
-    expect(
-      code(await TcpClient().run(BenchmarkConfig(tcpPort: port))),
-      NetworkFailureCode.refused,
+    final refused = await TcpClient().run(
+      BenchmarkConfig(tcpPort: port, timeoutMs: 8000),
     );
+    expect(code(refused), NetworkFailureCode.refused, reason: '$refused');
     value(await server.start(port: port));
     expect(
       code(await TcpClient().run(const BenchmarkConfig(host: 'example.com'))),

@@ -47,7 +47,7 @@ class NetworkFailure extends Failure {
           cause: error,
         );
       }
-      if (const <int>{61, 111, 10061}.contains(code)) {
+      if (const <int>{61, 111, 1225, 10061}.contains(code)) {
         return NetworkFailure(
           NetworkFailureCode.refused,
           'TCP connection refused.',

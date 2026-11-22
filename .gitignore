@@ -4,6 +4,8 @@
 *.pyc
 *.swp
 .DS_Store
+Thumbs.db
+desktop.ini
 .atom/
 .build/
 .buildlog/
@@ -12,16 +14,28 @@
 .swiftpm/
 migrate_working_dir/
 
+# Secrets and environment files
+.env
+.env.*
+*.env
+
+# Local database and export files
+*.db
+*.db-journal
+*.db-wal
+*.sqlite
+*.sqlite3
+*.part
+*.csv
+
 # IntelliJ related
 *.iml
 *.ipr
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# VS Code
+.vscode/
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -32,6 +46,11 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+
+# Desktop ephemeral files
+windows/flutter/ephemeral/
+macos/Flutter/ephemeral/
+linux/flutter/ephemeral/
 
 # Symbolication related
 app.*.symbols

@@ -60,7 +60,9 @@ class Validators {
     }
 
     final s = c.simulation;
-    if (s.lossPercent < 0 || s.lossPercent > NetworkConstants.maxLossPercent) {
+    if (!s.lossPercent.isFinite ||
+        s.lossPercent < 0 ||
+        s.lossPercent > NetworkConstants.maxLossPercent) {
       return 'Simulated loss must be between 0 and '
           '${NetworkConstants.maxLossPercent.toInt()}%.';
     }
@@ -75,10 +77,18 @@ class Validators {
     if (s.jitterMs > s.delayMs) {
       return 'Delay variation cannot exceed the added delay.';
     }
-    if (s.rateLimitMbps < 0 ||
+    if (!s.rateLimitMbps.isFinite ||
+        s.rateLimitMbps < 0 ||
         s.rateLimitMbps > NetworkConstants.maxRateLimitMbps) {
       return 'Rate limit must be between 0 (unlimited) and '
           '${NetworkConstants.maxRateLimitMbps.toInt()} Mbps.';
+    }
+    if (s.seed != null && (s.seed! < 0 || s.seed! > 0xffffffff)) {
+      return 'Seed must be between 0 and 4294967295.';
+    }
+    final minimumBits = c.protocol.includesUdp ? c.udpDatagramSize * 8 : 8;
+    if (s.hasRateLimit && minimumBits / s.rateLimitMbps > c.timeoutMs * 1000) {
+      return 'Send-rate cap is too low for the operation timeout.';
     }
     return null;
   }
